@@ -6,7 +6,7 @@ class NoWebAPI extends Component {
     render() {
         return (
             <div className="center-content">
-                <img src={Teamlogo} />
+                <img src={Teamlogo} alt="HKUST Robotics Team" />
                 To use Data Plot, use Google Chrome and enable Chrome Web API.
             </div>
         );
