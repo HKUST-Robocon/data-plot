@@ -28,12 +28,26 @@ All data packets should be in <a src="https://www.w3schools.com/js/js_json_intro
 
 For a data packet, member <code>type_id</code> must be included, it tells Data Plot how to decode the message, and visualize it.
 
-You may also include other members in packets as well, however, Data Plot will only handle necessary information.
+You may also include other members in packets. However, Data Plot will only handle necessary information.
 
-### Type and type ID
+### CONIFG (ID: 0)
 
-XY_POSITIONING: 0
+to set any configuration (e.g. game field, wheelbase, laser), send packets with type <code>0</code>.
 
-PATHING: 1
+### XY_POSITIONING (ID: 1)
 
-MOTOR_STATE: 2
+to update wheelbase position, send packets with type <code>0</code>.
+
+```javascript
+{
+    "type_id": 1,
+    "sub_id": 0,
+    "pos_x": .0,
+    "pos_y": .0,
+}
+```
+
+There are some sub commands:
+
+1. GO_TO (SUBID: 0): by sending this, Data Plot will consider the position is continuous.
+2. JUMP_TO (SUBID: 1): by sending this, Data Plot will consider the position is discontinuous.
