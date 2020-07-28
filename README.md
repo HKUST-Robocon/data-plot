@@ -74,6 +74,7 @@ Sub commands:
         <td>the color of dots will be changed, please note that the color format is <code>RGB888</code>.</td>
     </tr>
 </table>
+
 ```javascript
 {
     "type": 1,
