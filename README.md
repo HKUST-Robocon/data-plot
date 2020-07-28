@@ -1,6 +1,6 @@
 # HKUST Robotics Team Data Plot
 
-App link: https://kkdlau.student.ust.hk/data_plot/
+App link: to be released
 
 This is an experiment project - using Chrome Web Serial API to read UART data.
 
@@ -22,6 +22,16 @@ Since I'm the only developer who in charge of this project, there should many un
 
 Please note that it will open the default browser for debugging, so if your default browser is not Google Chrome, you may need explicitly state the browser you want to use in terminal.
 
+Here is an example of a packet:
+```javascript
+{
+    "type_id": 1, // 1 = sending positioning info
+    "sub_id": 0,
+    "pos_x": .0,
+    "pos_y": .0
+}
+```
+
 ## Data structure
 
 All data packets should be in <a src="https://www.w3schools.com/js/js_json_intro.asp">JSON</a> format, and in order to avoid stack overflow, transfer frequency should be greater 30ms (40ms is suggested).
@@ -36,18 +46,32 @@ to set any configuration (e.g. game field, wheelbase, laser), send packets with 
 
 ### XY_POSITIONING (ID: 1)
 
-to update wheelbase position, send packets with type <code>0</code>.
+to update wheelbase position, send packets with type <code>1</code>.
 
 ```javascript
 {
     "type_id": 1,
     "sub_id": 0,
     "pos_x": .0,
-    "pos_y": .0,
+    "pos_y": .0
 }
 ```
 
 There are some sub commands:
 
-1. GO_TO (SUBID: 0): by sending this, Data Plot will consider the position is continuous.
-2. JUMP_TO (SUBID: 1): by sending this, Data Plot will consider the position is discontinuous.
+1. GO_TO (<code>sub_id: 0</code>): by sending this, position will be printed on map.
+
+2. CLEAR_MAP (<code>sub_id: 1</code>): It will clear all the dots.
+
+3. SET_COLOR (<code>sub_id: 2</code>): the color of dots will be changed, please note that you need to include <code>color</code> member in RGB888.
+```javascript
+{
+    "type_id": 1,
+    "sub_id": 2,
+    "color":0xFFFFFF
+    // pos_x and pos_y can be omitted
+}
+```
+### MOTOR STATE (ID: 3)
+
+Motor State Page allows you to print anything about motor - rpm, velocity target, position target, etc.

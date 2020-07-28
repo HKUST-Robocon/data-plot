@@ -1,3 +1,6 @@
+const LOOP_INTERVAL = 100;
+let stack = 0;
+
 /**
  * Check if Web Serial API available or not.
  * 
@@ -38,6 +41,8 @@ class COMPort {
     rawMsg = "";
     decodeMsg = [];
     registered = [];
+    lastTicks = (new Date()).getTime();
+    destroy = false;
 
     constructor(uart) {
         this.uart = uart;
@@ -46,11 +51,19 @@ class COMPort {
         this.inputStream = this.decoder.readable;
         this.reader = this.inputStream.getReader();
 
-        this.readerLoop = setInterval(async () => {
-            console.log('raw message: ' + this.rawMsg);
-            this.reader.read().then((reading) => {
-                this.rawMsg += reading.value;
+        setTimeout(this.receiveRawMsg, 0);
+    }
+
+    receiveRawMsg = () => {
+        if (this.destroy) return;
+        console.log('stacked message: ' + this.rawMsg);
+        this.reader.read().then(reading => {
+            console.log('read');
+            this.rawMsg += reading.value;
+            while (1) {
                 const result = this.parseJSON(this.rawMsg);
+                if (stack > 10)
+                    return;
                 if (result) {
                     try {
                         this.rawMsg = this.rawMsg.substring(result.endIndex + 1);
@@ -65,14 +78,26 @@ class COMPort {
                         // maybe there are noises during transmittion, so it fks up
                         console.error(e);
                     }
-                }
-            });
+                } else break;
+            }
 
-        }, 30);
+
+            const ticks = (new Date()).getTime();
+            if (ticks - this.lastTicks > LOOP_INTERVAL) {
+                console.log('call instantly');
+                this.lastTicks = ticks;
+                this.receiveRawMsg();
+            } else {
+                console.log('call later');
+
+                setTimeout(this.receiveRawMsg, LOOP_INTERVAL - ticks + this.lastTicks);
+                this.lastTicks = ticks;
+            }
+        });
     }
 
     async disconnect() {
-        clearInterval(this.readerLoop);
+        this.destroy = true;
         await this.reader.cancel();
         await this.inputDone.catch(() => { });
         await this.uart.close();
@@ -84,10 +109,20 @@ class COMPort {
         const closeBracket = message.indexOf('}');
 
         if (openBracket === -1 || closeBracket === -1) return null;
-        if (openBracket > closeBracket || openBracket2 > closeBracket) {
+
+        /**
+         * For case } {{ / } {
+         */
+        if (Math.min(openBracket, openBracket2) > closeBracket && message.indexOf('}', openBracket)) {
+            console.log('search again');
+            if (stack > 10) {
+                console.log('stack: ' + message);
+                return;
+            }
+            stack++;
             return this.parseJSON(message.substring(closeBracket + 1));
         }
-
+        stack = 0;
         let realOpenBracket = -1;
 
         if (openBracket2 > openBracket && openBracket2 < closeBracket) {
