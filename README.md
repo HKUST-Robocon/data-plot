@@ -142,6 +142,7 @@ Example:
 {
     "type": 3,
     "sub_id": 1,
+    "id": "test_motor",
     "x": 0.1,
     "y": 1000.0
 }
