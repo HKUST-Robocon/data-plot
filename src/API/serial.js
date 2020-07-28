@@ -1,4 +1,4 @@
-const LOOP_INTERVAL = 100;
+const LOOP_INTERVAL = 30;
 let stack = 0;
 
 /**
