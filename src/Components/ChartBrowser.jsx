@@ -4,22 +4,22 @@ import { DATA_TYPE_ENUM } from '../API/data_type';
 import { RootContext } from '../rootContext';
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
-const motors = {};
+const charts = {};
 
 const SUB_CMD_ENUM = Object.freeze({
     REGISTER: 0,
     STATE_UPDATE: 1,
 });
 
-class MotorState extends Component {
+class ChartBrowser extends Component {
     chart;
 
     componentDidUpdate() {
         const state = this.context;
-        if (state.port && !state.motorState) {
+        if (state.port && !state.chartState) {
             state.port.on(DATA_TYPE_ENUM.MOTOR_STATE, this.decodedHandler);
             state.update({
-                motorState: true,
+                chartState: true,
             });
         }
     }
@@ -27,16 +27,16 @@ class MotorState extends Component {
     decodedHandler = (decoded) => {
         switch (decoded.sub_id) {
             case SUB_CMD_ENUM.REGISTER:
-                this.registerMotor(decoded);
+                this.registerChart(decoded);
                 break;
             case SUB_CMD_ENUM.STATE_UPDATE: {
-                this.motorStateUpdate(decoded);
+                this.chartStateUpdate(decoded);
             } break;
             default: break;
         }
     }
 
-    registerMotor = (decoded) => {
+    registerChart = (decoded) => {
         /**
          * id: string,
          * yunit: string,
@@ -44,16 +44,15 @@ class MotorState extends Component {
          * xunit: string,
          * xdisplay: string,
          * title: string
-         */ 
-        if (motors[decoded.id]) return;
-        console.log('register motor');
-        motors[decoded.id] = {
+         */
+        if (charts[decoded.id]) return;
+        charts[decoded.id] = {
             id: decoded.id,
             chart: null,
             pts: [],
         };
 
-        motors[decoded.id].options = {
+        charts[decoded.id].options = {
             animationEnabled: false,
             exportEnabled: true,
             theme: "light2",
@@ -70,56 +69,57 @@ class MotorState extends Component {
             },
             data: [{
                 type: "line",
-                dataPoints: motors[decoded.id].pts
+                dataPoints: charts[decoded.id].pts
             }]
         };
 
         this.forceUpdate();
     }
 
-    motorStateUpdate = (decoded) => {
+    chartStateUpdate = (decoded) => {
         console.log('update state');
-        motors[decoded.id].pts.push({
+        charts[decoded.id].pts.push({
             x: decoded.x,
             y: decoded.y
         });
 
-        while (motors[decoded.id].pts.length > 100) {
-            motors[decoded.id].pts.shift();
+        while (charts[decoded.id].pts.length > 100) {
+            charts[decoded.id].pts.shift();
         }
 
-        motors[decoded.id].chart.render();
+        charts[decoded.id].chart.render();
     }
 
     componentWillUnmount() {
         console.log('unmount');
         const state = this.context;
-        state.port.off(DATA_TYPE_ENUM.MOTOR_STATE, this.decodedHandler);
+        if (state.port)
+            state.port.off(DATA_TYPE_ENUM.MOTOR_STATE, this.decodedHandler);
         state.update({
-            motorState: false,
+            chartState: false,
         });
     }
 
     render() {
-        if (Object.keys(motors).length) {
-                    return (
-            <div>
-                {
-                    Object.values(motors).map(m => <CanvasJSChart options={m.options} onRef={ref => m.chart = ref} />)
-                }
-            </div>
-        );
+        if (Object.keys(charts).length) {
+            return (
+                <div>
+                    {
+                        Object.values(charts).map(c => <CanvasJSChart key={c.id} options={c.options} onRef={ref => c.chart = ref} />)
+                    }
+                </div>
+            );
         } else {
-            return (<div>To view motors' state, register a motor.</div>)
+            return (<div>No charts are available. Please register your chart.</div>)
         }
 
     }
 }
 
-MotorState.propTypes = {
+ChartBrowser.propTypes = {
 
 };
 
-MotorState.contextType = RootContext;
+ChartBrowser.contextType = RootContext;
 
-export default MotorState;
+export default ChartBrowser;

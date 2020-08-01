@@ -42,11 +42,11 @@ For a data packet, member <code>type</code> must be included, it tells Data Plot
 
 You may also include other members in packets. However, Data Plot will only handle necessary information.
 
-### CONIFG (ID: 0)
+### CONIFG (type: 0)
 
 to set any configuration (e.g. game field, wheelbase, laser), send packets with type <code>0</code>.
 
-### XY_POSITIONING (ID: 1)
+### POSITIONING_N_PATHING (type: 1)
 
 to update wheelbase position, send packets with type <code>1</code>.
 
@@ -71,7 +71,23 @@ Sub commands:
         <tr>
         <td>2</td>
         <td>SET_COLOR</td>
-        <td>the color of dots will be changed, please note that the color format is <code>RGB888</code>.</td>
+        <td>The color of dots will be changed, please note that the color format is <code>RGB888</code>.</td>
+    </tr>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>ADD_PATHING_POINT</td>
+        <td>Add a control point of a path.</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>SET_DISPLAY_PATH</td>
+        <td>Set current display path.</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>SHOULD_SHOW_PATH</td>
+        <td>Display a path or not.</td>
     </tr>
 </table>
 
@@ -98,7 +114,8 @@ Sub commands:
     "color":0xFFFFFF
 }
 ```
-### MOTOR STATE (ID: 3)
+
+### MOTOR_STATE (type: 2)
 
 Motor State Page allows you to print anything about motor - rpm, velocity target, position target, etc.
 
@@ -126,7 +143,7 @@ Example:
 ```javascript
 // Register a motor
 {
-    "type": 3,
+    "type": 2,
     "sub_id": 0,
     "id": "test_motor",
     "yunit": "m/s",
@@ -140,10 +157,12 @@ Example:
 ```javascript
 // update motor state
 {
-    "type": 3,
+    "type": 2,
     "sub_id": 1,
     "id": "test_motor",
     "x": 0.1,
     "y": 1000.0
 }
 ```
+
+### STATE_MACHINE (type: 3)

@@ -4,7 +4,7 @@ import { RootContext } from '../rootContext';
 import Button from '@material-ui/core/Button';
 import * as SP from '../API/serial';
 import XYPosCanvas from './pixi/XYPosCanvas';
-import MotorState from './MotorState';
+import ChartBrowser from './ChartBrowser';
 
 const Title = (props) => {
     const { children, title, variant, ...other } = props;
@@ -58,7 +58,6 @@ class Setting extends Component {
                                     <div style={{ marginLeft: '10px' }} />
                                 </Typography>
                             </div>
-                            <MotorState />
                         </div>
                     )
                 }

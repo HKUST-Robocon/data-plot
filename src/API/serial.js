@@ -1,5 +1,6 @@
+import { DATA_TYPE_ENUM } from '../API/data_type';
+
 const LOOP_INTERVAL = 30;
-let stack = 0;
 
 /**
  * Check if Web Serial API available or not.
@@ -50,20 +51,44 @@ class COMPort {
         this.inputDone = uart.readable.pipeTo(this.decoder.writable);
         this.inputStream = this.decoder.readable;
         this.reader = this.inputStream.getReader();
+        if (window.userConfig) {
+            this.loadPathing(window.userConfig);
+            this.loadUserConfig(window.userConfig);
+        }
 
         setTimeout(this.receiveRawMsg, 0);
+        window.sp = this;
+    }
+
+    loadUserConfig(raw) {
+        JSON.parse(raw).config.forEach(cmd => {
+            this.rawMsg += JSON.stringify(cmd);
+        });
+    }
+
+    loadPathing(raw) {
+        const pathing = JSON.parse(raw).pathing;
+        for (let p in pathing) {
+            const msg = {
+                type: DATA_TYPE_ENUM.POSITIONING_N_PATHING,
+                sub_id: 3,
+                id: p,
+                pts: pathing[p]
+            };
+            this.rawMsg += JSON.stringify(msg);
+            console.log('add path');
+        }
     }
 
     receiveRawMsg = () => {
         if (this.destroy) return;
         console.log('stacked message: ' + this.rawMsg);
+        console.log(this.decodeMsg.length);
         this.reader.read().then(reading => {
             console.log('read');
             this.rawMsg += reading.value;
             while (1) {
                 const result = this.parseJSON(this.rawMsg);
-                if (stack > 10)
-                    return;
                 if (result) {
                     try {
                         this.rawMsg = this.rawMsg.substring(result.endIndex + 1);
@@ -71,8 +96,9 @@ class COMPort {
                         this.decodeMsg.push(JSON.parse(result.parsable));
                         this.registered.forEach((decoder, i) => {
                             const msg = this.decodeMsg[this.decodeMsg.length - 1]
-                            if (decoder.type === msg.type)
+                            if (decoder.type === msg.type) {
                                 decoder.listener(msg);
+                            }
                         });
                     } catch (e) {
                         // maybe there are noises during transmittion, so it fks up
@@ -80,7 +106,6 @@ class COMPort {
                     }
                 } else break;
             }
-
 
             const ticks = (new Date()).getTime();
             if (ticks - this.lastTicks > LOOP_INTERVAL) {
@@ -115,14 +140,8 @@ class COMPort {
          */
         if (Math.min(openBracket, openBracket2) > closeBracket && message.indexOf('}', openBracket)) {
             console.log('search again');
-            if (stack > 10) {
-                console.log('stack: ' + message);
-                return;
-            }
-            stack++;
             return this.parseJSON(message.substring(closeBracket + 1));
         }
-        stack = 0;
         let realOpenBracket = -1;
 
         if (openBracket2 > openBracket && openBracket2 < closeBracket) {
