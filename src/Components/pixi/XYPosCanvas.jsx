@@ -48,7 +48,7 @@ const toGameFieldPos = (x, y, type) => {
 
 class XYPosCanvas extends Component {
     app;
-    gameCanvas;
+    canvas;
     rootState;
     drawer;
     pathDrawer;
@@ -64,7 +64,7 @@ class XYPosCanvas extends Component {
 
     componentDidMount() {
         this.app = new PIXI.Application(1150, 665);
-        this.gameCanvas.appendChild(this.app.view);
+        this.canvas.appendChild(this.app.view);
         this.app.start();
         this.gameField = PIXI.Sprite.fromImage(GAME_FIELD_IMG);
         this.app.stage.addChild(this.gameField);
@@ -72,6 +72,10 @@ class XYPosCanvas extends Component {
         this.pathDrawer = new PIXI.Graphics();
         this.app.stage.addChild(this.drawer);
         this.app.stage.addChild(this.pathDrawer);
+
+        // window.onresize = this.windowSizeChange;
+
+        // this.windowSizeChange(null);
     }
 
     componentDidUpdate() {
@@ -85,12 +89,22 @@ class XYPosCanvas extends Component {
         }
     }
 
+    windowSizeChange = e => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        var ratio = Math.min(width / this.app.renderer.width, height / this.app.renderer.height);
+
+        this.app.renderer.resize(Math.ceil(1150 * ratio), Math.ceil(665 * ratio));
+    }
+
     decodedHandler = (decoded) => {
         const state = this.context;
+        console.log('pos cmd decode');
 
         switch (decoded.sub_id) {
             case SUB_CMD_ENUM.GO_TO: {
-                const pos = toGameFieldPos(decoded.x * 100, decoded.y * 100, GAMEFIELD_ENUM.BLUE);
+                const pos = toGameFieldPos(decoded.x * 100, decoded.y * 100, GAMEFIELD_ENUM.RED);
                 if (Math.abs(pos.x - this.last_pos.x) > 0.02 || Math.abs(pos.y - this.last_pos.y) > 0.02 || Math.abs(pos.a + this.last_pos.a) > 0.03) {
                     this.drawWheelbase(pos.x, pos.y, -decoded.a);
                     console.log('draw');
@@ -181,7 +195,7 @@ class XYPosCanvas extends Component {
     drawPath = (path_id, color) => {
         const state = this.context;
         this.pathing[path_id].forEach(pt => {
-            const p = toGameFieldPos(pt[0] * 100, pt[1] * 100, GAMEFIELD_ENUM.BLUE);
+            const p = toGameFieldPos(pt[0] * 100, pt[1] * 100, GAMEFIELD_ENUM.RED);
             this.drawDot(this.pathDrawer, p.x, p.y, 3, color);
         });
     }
@@ -205,7 +219,7 @@ class XYPosCanvas extends Component {
                 <Button disabled={state.port ? false : true} style={{ margin: '10px 10px 10px 10px' }} variant="contained" color="primary" onClick={() => {
                     window.sp.rawMsg += CLEAR_POS;
                 }}>Clear Pos Records</Button>
-                <div ref={(thisDiv) => { component.gameCanvas = thisDiv }} />
+                <div ref={(thisDiv) => { component.canvas = thisDiv }} />
             </div>
         );
     }

@@ -7,10 +7,23 @@ import * as SP from './API/serial';
 import NoWebAPI from './Components/NoWebAPI.jsx';
 import * as DP_CMD from './API/packet_helper';
 import RootStateProvider from './rootContext';
+import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 window.DP_CMD = DP_CMD;
 
 window.userConfig = null;
+
+const theme = createMuiTheme({
+  palette: {
+    type: 'dark',
+    primary: {
+      main: '#212121'
+    },
+    secondary: {
+      main: '#1976d2'
+    }
+  }
+});
 
 document.getElementById('config-input').addEventListener('change', e => {
   const file = e.target.files[0];
@@ -28,7 +41,7 @@ document.getElementById('config-input').addEventListener('change', e => {
 ReactDOM.render(
   <React.StrictMode>
     {
-      SP.isAPIAvailable() ? <RootStateProvider><App /></RootStateProvider> : <NoWebAPI />
+      SP.isAPIAvailable() ? <RootStateProvider><ThemeProvider theme={theme}><App /></ThemeProvider></RootStateProvider> : <NoWebAPI />
     }
   </React.StrictMode>,
   document.getElementById('root')
