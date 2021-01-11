@@ -5,31 +5,27 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
-import Setting from './Components/Setting';
+import General from './components/General';
 import { RootContext } from './rootContext';
-import { Button, Box } from '@material-ui/core';
-import XYPosCanvas from './Components/pixi/XYPosCanvas';
-import ChartBrowser from './Components/ChartBrowser';
+import { Button } from '@material-ui/core';
+import XYPosCanvas from './components/XYPosCanvas';
+import ChartBrowser from './components/ChartBrowser';
 import * as SP from './API/serial';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
   return (
-    <Box>
-      <div
-        className={value === index ? "page-container" : "none"}
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && (
-          props.children
-        )}
-      </div>
-    </Box>
+    <div
+      className={value === index ? "page-container" : "none"}
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {props.children}
+    </div>
   );
 }
 
@@ -77,7 +73,7 @@ function App() {
         </Tabs>
       </AppBar>
       <TabPanel index={0} value={state.currentPage}>
-        <Setting />
+        <General />
       </TabPanel>
       <TabPanel index={1} value={state.currentPage}>
         <XYPosCanvas />

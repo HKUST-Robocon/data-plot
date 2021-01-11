@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import * as PIXI from 'pixi.js';
-import GAME_FIELD_IMG from '../../assets/game_field.jpeg';
-import { RootContext } from '../../rootContext';
-import { DATA_TYPE_ENUM, GAMEFIELD_ENUM } from '../../API/data_type';
-import { WB_INFO } from '../../API/wb_info';
+import GAME_FIELD_IMG from '../assets/game_field.jpeg';
+import { RootContext } from '../rootContext';
+import { DATA_TYPE_ENUM, GAMEFIELD_ENUM } from '../API/data_type';
+import { WB_INFO } from '../API/wb_info';
 import { Button } from '@material-ui/core';
-import { CLEAR_POS } from '../../API/packet_helper';
+import { CLEAR_POS } from '../API/packet_helper';
 
 const SUB_CMD_ENUM = Object.freeze({
     GO_TO: 0,
@@ -62,6 +62,14 @@ class XYPosCanvas extends Component {
 
     }
 
+    componentWillMount() {
+        this.context.update({
+            XYPositioning: {
+                xyPosRegistered: false
+            }
+        });
+    }
+
     componentDidMount() {
         this.app = new PIXI.Application(1150, 665);
         this.canvas.appendChild(this.app.view);
@@ -80,11 +88,13 @@ class XYPosCanvas extends Component {
 
     componentDidUpdate() {
         const state = this.context;
-        if (state.port && !state.xyPosRegistered) {
+        if (state.port && !state.XYPositioning.xyPosRegistered) {
             state.port.on(DATA_TYPE_ENUM.POSITIONING_N_PATHING, this.decodedHandler);
             state.update({
-                xyPosRegistered: true,
-                drawPosColor: 0xFFFF00
+                XYPositioning: {
+                    xyPosRegistered: true,
+                    drawPosColor: 0xFFFF00
+                }
             });
         }
     }
@@ -128,7 +138,6 @@ class XYPosCanvas extends Component {
                 });
             } break;
             case SUB_CMD_ENUM.ADD_PATHING: {
-                console.log(deepClone(decoded.pts));
                 this.pathing[decoded.id] = deepClone(decoded.pts);
                 this.drawPath(decoded.id, 0xFF00FF);
             } break;
@@ -205,10 +214,11 @@ class XYPosCanvas extends Component {
         if (state.port)
             state.port.off(DATA_TYPE_ENUM.POSITIONING_N_PATHING, this.decodedHandler);
         state.update({
-            xyPosRegistered: false
+            XYPositioning: {
+                xyPosRegistered: false
+            }
         });
         this.app.stop();
-
     }
 
     render() {
@@ -216,9 +226,16 @@ class XYPosCanvas extends Component {
         const state = this.context;
         return (
             <div>
-                <Button disabled={state.port ? false : true} style={{ margin: '10px 10px 10px 10px' }} variant="contained" color="primary" onClick={() => {
-                    window.sp.rawMsg += CLEAR_POS;
+                <Button style={{ margin: '10px 10px 10px 10px' }} variant="contained" color="primary" onClick={() => {
+                    this.drawer.clear();
                 }}>Clear Pos Records</Button>
+                <Button style={{ margin: '10px 10px 10px 10px' }} variant="contained" color="primary" onClick={() => {
+                    this.decodedHandler({
+                        type: 1,
+                        sub_id: 0,
+                        draw: 1
+                    });
+                }}>Draw Wheelbase Frame</Button>
                 <div ref={(thisDiv) => { component.canvas = thisDiv }} />
             </div>
         );

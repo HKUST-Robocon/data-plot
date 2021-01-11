@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import * as SP from './API/serial';
-import NoWebAPI from './Components/NoWebAPI.jsx';
+import NoWebAPI from './components/NoWebAPI.jsx';
 import * as DP_CMD from './API/packet_helper';
 import RootStateProvider from './rootContext';
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';

@@ -3,12 +3,42 @@
         {
             "type": 2,
             "sub_id": 0,
-            "id": "config_motor",
+            "id": "vs_chart",
             "yunit": "m/s",
             "ydisplay": "speed",
             "xunit": "s",
             "xdisplay": "time",
-            "title": "Test Motor Speed Chart"
+            "title": "Wheelbase Velocity"
+        },
+        {
+            "type": 2,
+            "sub_id": 0,
+            "id": "driving_motor_0",
+            "yunit": "m/s",
+            "ydisplay": "speed",
+            "xunit": "s",
+            "xdisplay": "time",
+            "title": "DM_0 RPS"
+        },
+        {
+            "type": 2,
+            "sub_id": 0,
+            "id": "driving_motor_1",
+            "yunit": "m/s",
+            "ydisplay": "speed",
+            "xunit": "s",
+            "xdisplay": "time",
+            "title": "DM_1 RPS"
+        },
+        {
+            "type": 2,
+            "sub_id": 0,
+            "id": "driving_motor_2",
+            "yunit": "m/s",
+            "ydisplay": "speed",
+            "xunit": "s",
+            "xdisplay": "time",
+            "title": "DM_2 RPS"
         }
     ],
     "pathing": {

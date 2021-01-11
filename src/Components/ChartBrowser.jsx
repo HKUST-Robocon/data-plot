@@ -14,6 +14,10 @@ const SUB_CMD_ENUM = Object.freeze({
 class ChartBrowser extends Component {
     chart;
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return false;
+    }
+
     componentDidUpdate() {
         const state = this.context;
         if (state.port && !state.chartState) {
@@ -26,9 +30,9 @@ class ChartBrowser extends Component {
 
     decodedHandler = (decoded) => {
         switch (decoded.sub_id) {
-            case SUB_CMD_ENUM.REGISTER:
+            case SUB_CMD_ENUM.REGISTER: {
                 this.registerChart(decoded);
-                break;
+            } break;
             case SUB_CMD_ENUM.STATE_UPDATE: {
                 this.chartStateUpdate(decoded);
             } break;
@@ -83,7 +87,7 @@ class ChartBrowser extends Component {
             y: decoded.y
         });
 
-        while (charts[decoded.id].pts.length > 100) {
+        while (charts[decoded.id].pts.length > 50) {
             charts[decoded.id].pts.shift();
         }
 
@@ -103,7 +107,7 @@ class ChartBrowser extends Component {
     render() {
         if (Object.keys(charts).length) {
             return (
-                <div>
+                <div >
                     {
                         Object.values(charts).map(c => <CanvasJSChart key={c.id} options={c.options} onRef={ref => c.chart = ref} />)
                     }
